@@ -1,6 +1,17 @@
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Recitation: R02
+ */
+
+
 public class CodeBlock {
+    /*
+    Predefined BLOCK_TYPES, saved as array.
+     */
     public static final String[] BLOCK_TYPES = {"def","for","while","if","else","elif"};
-    public static final int DEF = 0, FOR = 1, WHILE = 2, IF = 3, ELIF = 4, ELSE = 5;
+    public static final int DEF = 0, FOR = 1, WHILE = 2, IF = 3, ELSE= 4, ELIF = 5;
 
 
     private Complexity blockComplexity;
@@ -9,8 +20,16 @@ public class CodeBlock {
     private String name;
     private String loopVariable;
 
+    public CodeBlock(){
+
+    }
+
+    /**
+     * Getters and setters for block complexity.
+     * @return
+     */
     public Complexity getBlockComplexity() {
-        return blockComplexity;
+        return this.blockComplexity;
     }
     public void setBlockComplexity(Complexity blockComplexity) {
         this.blockComplexity = blockComplexity;
@@ -24,19 +43,22 @@ public class CodeBlock {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
     public void setName(String name) {
         this.name = name;
     }
 
     public String getLoopVariable() {
-        return loopVariable;
+        return this.loopVariable;
     }
     public void setLoopVariable(String loopVariable) {
         this.loopVariable = loopVariable;
     }
 
+    /*
+    This is a constructor.
+     */
     public CodeBlock(String name, String loopVariable, Complexity blockComplexity, Complexity highestSubComplexity){
         this.name = name;
         this.loopVariable = loopVariable;
