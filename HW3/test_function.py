@@ -6,13 +6,18 @@ def test_function(n):
     # Get the range [0, floor(log(n))-1] 
     log_N = xrange(int(math.log(n, 2)))
 
-    # Stack record that loops from 0 to n-1.
-    for i in N:
+#     # Stack record that loops from 0 to n-1.
+#     for i in N:
+#
+#         # Nested stack record that loops from 0 to floor(log(n))-1.
+#         for j in log_N:
+#
+#             print("This statement prints n * log(n) times.")
 
-        # Nested stack record that loops from 0 to floor(log(n))-1.
-        for j in log_N:
+#         print("HERE")
+#         for k in N:
+#             print ("here")
 
-            print("This statement prints n * log(n) times.")
 
     # All 'while' statements will have a variable go from 'n' to 1.
     k = n
@@ -22,7 +27,7 @@ def test_function(n):
 
         # But you will have to determine the order from the
         # update statement (log(n), in this case).
-        k /= 2 
+        k -= 2
 
     print("Since n * log(n) is bigger complexity, the whole "
           "funtion is O(n * log(n).")

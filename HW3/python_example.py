@@ -62,6 +62,6 @@ def fun_declaration(params):
 
     # End of 'def' block.
 
-# This statement occurs outside of 'fun_declaration', because it 
+# This statement occurs outside of 'fun_declaration', because it
 # is not indented.
 print("Outside of 'fun_declaration'.")
