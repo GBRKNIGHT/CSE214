@@ -1,14 +1,21 @@
 
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Recitation: R02
+ */
+
+
 import java.util.*;
 
 
 public class Router extends LinkedList<Packet> {
 
-
+    /*
+    required data fields.
+     */
     private int maxBufferSize;
-
     private LinkedList<Packet> router;
-
     public LinkedList<Packet> getRouter() {
         return this.router;
     }
@@ -18,6 +25,9 @@ public class Router extends LinkedList<Packet> {
     }
 
 
+    /*
+    need to override these methods to apply java LinkedList API class.
+     */
     @Override
     public Packet element(){
         return this.router.element();
@@ -64,8 +74,10 @@ public class Router extends LinkedList<Packet> {
     dequeue method
      */
     public Packet dequeue(){
-        Packet dequeuedPacket = this.router.peek().clone();
-        this.router.remove();
+        Packet dequeuedPacket = this.router.peek();
+        if (this.router.isEmpty()==false){
+            this.router.removeFirst();
+        }
         return dequeuedPacket;
     }
 
@@ -79,33 +91,57 @@ public class Router extends LinkedList<Packet> {
     }
 
 
+    /**
+     * To string method.
+     * @return String in a specific given format.
+     */
     public String toString(){
-        String s = "{";
+        String s = "{ ";
         for (int i = 0; i < router.size(); i++){
-            s += router.get(i+1).toString() + " , ";
+            s += router.get(i).toString() + ",";
         }
-        s+= "}";
+        s+= " }";
         return s;
     }
 
-    /*
-    Send packet to method.
+    /**
+     * Send packet to method, basically, this method does not enqueue, it is just needed to point out what is the the
+     * best intermediate router that this packet can use.
+     * If there are multiple routers have same free spaces, it will choose the first one.
+     * @param routers The LinkedList of intermediate routers
+     * @return int , the best router to go to.
+     * @throws IntermediateRouterAllFullException Self-defined exception, indicate all routers are full
      */
-    public static int sendPacketTo(ArrayList<Router> routers)throws IntermediateRouterAllFullException{
-        ArrayList<Integer> routersSize = new ArrayList<>();
+    public static int sendPacketTo(LinkedList<Router> routers)throws IntermediateRouterAllFullException{
+        ArrayList<Integer> overallAvailableBufferSize = new ArrayList<>();
+        int sendTo = 0;
         for (int i = 0; i < routers.size(); i++){
-            Router temp = (Router) routers.get(i);
-            routersSize.add(temp.size());
-            }
-        if (Collections.max(routersSize) <= 0 ) {
+            overallAvailableBufferSize.add (routers.get(i).maxBufferSize - routers.get(i).size());
+        }
+        int maxAvailable = Collections.max(overallAvailableBufferSize);
+        /*
+        If all routers are full, throw exception.
+         */
+        if (maxAvailable <= 0){
             throw new IntermediateRouterAllFullException();
         }
-        return Collections.max(routersSize);
+        for (int i = 0; i < routers.size(); i++){
+            if (overallAvailableBufferSize.get(i) == maxAvailable){
+                sendTo = i;
+                break;
+            }
+        }
+        return sendTo;
     }
 
     public void setMaxBufferSize(int maxBufferSize) {
         this.maxBufferSize = maxBufferSize;
     }
+
+    public int getMaxBufferSize() {
+        return this.maxBufferSize;
+    }
+
 }
 
 

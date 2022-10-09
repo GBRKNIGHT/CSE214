@@ -1,4 +1,14 @@
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Recitation: R02
+ */
+
 public class Packet {
+    /*
+    All required data fields.
+     */
     private static int packetCount = 0;
     private int id;
     private int packetSize;
@@ -9,14 +19,14 @@ public class Packet {
     Default constructor
      */
     public Packet(){
-        this.packetCount++;
+        Packet.packetCount++;
     }
 
     /*
     Constructor with given data fields
      */
     public Packet (int id, int packetSize, int timeArrive, int timeToDest){
-        this.packetCount++;
+        Packet.packetCount++;
         this.id = id;
         this.packetSize = packetSize;
         this.timeArrive = timeArrive;
@@ -71,8 +81,7 @@ public class Packet {
     toString method in given format.
      */
     public String toString(){
-        String s = "[ " + this.getId()+" , " + this.getTimeArrive()+ " , " + this.getTimeToDest()+ " ]";
-        System.out.println(s);
+        String s = "[ " + this.getId()+" , " + (this.getTimeArrive()+1)+ " , " + (this.getTimeToDest()+1)+ " ]";
         return s;
     }
 
@@ -80,6 +89,9 @@ public class Packet {
         return this.getTimeToDest() - this.getTimeArrive();
     }
 
+    /*
+    Extra clone method.
+     */
     public Packet clone(){
         return new Packet(this.id,this.packetSize,this.timeArrive,this.timeToDest);
     }
