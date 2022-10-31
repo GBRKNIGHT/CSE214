@@ -1,11 +1,15 @@
-import java.util.logging.Level;
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Recitation: R02
+ */
 
 public class DirectoryTree {
     /**
      * Requested data fields, include root and cursor.
      */
     private DirectoryNode root, cursor;
-
 
     public DirectoryNode getCursor() {
         return this.cursor;
@@ -52,14 +56,24 @@ public class DirectoryTree {
     public void changeDirectory(String name) throws NotADirectoryException{
         name = name.trim();
         String[] nameSplit = name.split("/",-1);
-        this.resetCursor();
-
-        for (int i = 0; i < nameSplit.length; i++){
+        for (int i = 0; i < nameSplit.length && i < cursor.getChildren().length; i++){
             if (name.equals("root")) {
-                cursor = root;
-            } else if((cursor.getChildren()[i] != null)&& (cursor.getChildren()[i].getName().equals(nameSplit[i]))){
+                resetCursor();
+                System.out.println("The cursor has been set to root successfully.");
+            }
+            else if (name.equals("/")){
+                resetCursor();
+            }
+            else if (isThisNameCursorChild(name) != -999){
+                int indexOfMatchedChild = isThisNameCursorChild(name);
+                cursor = cursor.getChild(indexOfMatchedChild);
+            }
+            else if(isThisNameCursorChild(nameSplit[i+1]) != -999){
                 cursor = cursor.getChild(i);
-            } else{
+                break;
+            }
+            else{
+                this.resetCursor();
                 System.out.println("Directory cannot be found!");
                 throw new NotADirectoryException();
             }
@@ -79,11 +93,12 @@ public class DirectoryTree {
      * Find the directory from below to above, until it reach the root, root's parent must be null.
      * @return the directory in String.
      */
-    public String presentWorkingDirectory(){
+    public String presentWorkingDirectory() throws NotADirectoryException{
         String directory = "" + this.cursor.getName();
-        while(this.cursor.getParent()!= null){
-            this.setCursor(this.cursor.getParent());
-            directory = this.cursor.getName() + "/" + directory;
+        DirectoryNode current = DirectoryNode.cloneNode(cursor);
+        while(current.getParent()!= null){
+            current = current.getParent();
+            directory = current.getName() + "/" + directory;
         }
         return directory;
     }
@@ -102,6 +117,9 @@ public class DirectoryTree {
                 children += " ";
                 children += cursor.getChild(i).getName();
             }
+            else{
+                break;
+            }
         }
         if (allNull){
             return "No children in this cursor!";
@@ -115,22 +133,25 @@ public class DirectoryTree {
      * Prints a formatted nested list of names of all the nodes in the directory tree, starting from the cursor.
      */
     public void printDirectoryTree(){
+        recursive_print(0, cursor);
+    }
+
+    public void recursive_print(int indent, DirectoryNode current){
         String printLine = "";
-        String spaces = "";
-        if (cursor.getIsFile()){
-            printLine += (spaces + "-  " + cursor.getName());
-            System.out.print(printLine);
+        for (int i = 0; i<indent; i++){
+            printLine += "    ";
+        }
+        if (current.getIsFile()){
+            printLine += ("-  " + current.getName());
+            System.out.println(printLine);
         }else{
-            printLine += (spaces +"|-  " + cursor.getName());
-            System.out.print(printLine);
-            printLine = "";
-            spaces += "  ";
-            String cursorListDirectory = this.listDirectory().trim();
-            String[] cursorListDirectoryArray = cursorListDirectory.split(" ", DirectoryNode.MAX_CHILDREN);
-            for (int i = 0; i < cursorListDirectoryArray.length; i++){
-                System.out.println(spaces);
-                printDirectoryTree();
+            printLine += ( "|-  " + current.getName());
+            System.out.println(printLine);
+            indent += 1;
+            for (int i = 0; current.getChild(i)!= null; i++){
+                recursive_print(indent, current.getChild(i));
             }
+
         }
     }
 
@@ -191,22 +212,79 @@ public class DirectoryTree {
         }
     }
 
-    public String findNode(String findingName){
-        this.resetCursor();
-        if (cursor.getName().equals(findingName)){;
-            return this.presentWorkingDirectory();
-        }else{
-            for (int i = 0; cursor.getChild(i)!= null; i++){
-                if (cursor.getChild(i).getName().equals(findingName)){
-                    cursor = cursor.getChild(i);
-                    return this.presentWorkingDirectory();
-                }
-                else{
-                    return findNode(findingName);
-                }
-            }
-        }
-        return null;
+
+    /**
+     * Extra find node method, intend to find the node in a specific path.
+     * @param findingName input file or directory name.
+     * @return The path of given match of the given name.
+     * @throws NotADirectoryException
+     */
+    public void findNode(String findingName) throws NotADirectoryException{
+        recursiveFind(findingName, this.root);
     }
 
+    public void recursiveFind(String inputName, DirectoryNode node){
+        if (node == null) return;
+        else{
+            if (stringEqual(node.getName(), inputName)){
+                System.out.println(DirectoryNode.presentWorkingDirectory(node));
+                //return;
+            }
+
+            if (node.getIsFile()) return;
+            for (int i = 0; i < DirectoryNode.MAX_CHILDREN; i++){
+                recursiveFind(inputName,node.getChild(i));
+            }
+
+            
+                //return;
+
+        }
+    }
+
+
+    /**
+     * Self defined equal method for 2 strings.
+     * @param string1
+     * @param string2
+     * @return
+     */
+    public static boolean stringEqual(String string1, String string2){
+        if (string1.length() != string2.length()) return false;
+        else{
+            for (int i = 0; i < string1.length(); i++){
+                if (string1.charAt(i) != string2.charAt(i)){
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+
+    /**
+     * find the name is cursor's child or not.
+     * @param possibleChild possible name.
+     * @return
+     */
+    public int isThisNameCursorChild(String possibleChild){
+        for (int i = 0; i < cursor.getChildren().length; i++){
+            if (cursor.getChild(i)!= null && stringEqual(cursor.getChild(i).getName(),possibleChild)){
+                return i;
+            }else if(cursor.getChild(i) == null){
+                return -999;
+            }
+        }
+        return -999;
+    }
+
+
+    /**
+     * Method to pin cursor back to its parent.
+     */
+    public void backToParent(){
+        if (this.cursor.getParent()!= null) {
+            this.setCursor(cursor.getParent());
+        }
+    }
 }

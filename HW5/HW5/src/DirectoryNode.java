@@ -1,3 +1,11 @@
+
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Recitation: R02
+ */
+
 public class DirectoryNode {
     /**
      * Given data fields.
@@ -58,7 +66,7 @@ public class DirectoryNode {
 
     /**
      * getter and setter for the extra parameter.
-     * @param parent
+     * @param parent personalized data, indicate its parent.
      */
     public void setParent(DirectoryNode parent) {
         this.parent = parent;
@@ -169,11 +177,38 @@ public class DirectoryNode {
         return result;
     }
 
+
+    /**
+     * Extra method to clone a node, for convenience to detect the root, or doing other manipulations without
+     * moving the cursor.
+     * @param node can be current cursor node.
+     * @return new cloned node.
+     */
+    public static DirectoryNode cloneNode(DirectoryNode node){
+        DirectoryNode clonedNode = new DirectoryNode(node.name, node.getChildren(),node.getParent(),node.getIsFile());
+        return clonedNode;
+    }
+
+
+    /**
+     * detect current working directory, form a node to find its parent until it reaches root.
+     * @param node input node
+     * @return
+     */
+    public static String presentWorkingDirectory(DirectoryNode node) {
+        String directory = "" + node.getName();
+        DirectoryNode current = DirectoryNode.cloneNode(node);
+        while(current.getParent()!= null){
+            current = current.getParent();
+            directory = current.getName() + "/" + directory;
+        }
+        return directory;
+    }
 }
 
 
 /**
- * 2 exceptions defined in the addChild method.
+ * 2 exceptions defined.
  */
 class FullDirectoryException extends Exception{
 
