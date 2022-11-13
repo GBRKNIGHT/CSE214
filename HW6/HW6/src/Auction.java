@@ -1,4 +1,6 @@
-public class Auction {
+import java.io.Serializable;
+
+public class Auction implements Serializable {
     private int timeRemaining;
     private double currentBid;
     private String auctionID, sellerName, buyerName,itemInfo;
@@ -30,48 +32,24 @@ public class Auction {
         return this.timeRemaining;
     }
 
-    public void setTimeRemaining(int timeRemaining) {
-        this.timeRemaining = timeRemaining;
-    }
-
     public double getCurrentBid() {
         return this.currentBid;
-    }
-
-    public void setCurrentBid(double currentBid) {
-        this.currentBid = currentBid;
     }
 
     public String getAuctionID() {
         return this.auctionID;
     }
 
-    public void setAuctionID(String auctionID) {
-        this.auctionID = auctionID;
-    }
-
     public String getBuyerName() {
         return this.buyerName;
-    }
-
-    public void setBuyerName(String buyerName) {
-        this.buyerName = buyerName;
     }
 
     public String getSellerName() {
         return this.sellerName;
     }
 
-    public void setSellerName(String sellerName) {
-        this.sellerName = sellerName;
-    }
-
     public String getItemInfo() {
         return this.itemInfo;
-    }
-
-    public void setItemInfo(String itemInfo) {
-        this.itemInfo = itemInfo;
     }
 
 
@@ -81,10 +59,49 @@ public class Auction {
      */
     public void decrementTimeRemaining(int time){
         if (time >= this.timeRemaining){
-            this.setTimeRemaining(0);
+            this.timeRemaining = 0;
         }else{
             int currentTimeRemaining = this.getTimeRemaining();
-            this.setTimeRemaining(currentTimeRemaining - time);
+            this.timeRemaining = (currentTimeRemaining - time);
         }
     }
+
+
+    /** Brief:
+     * Makes a new bid on this auction. If bidAmt is larger than currentBid,
+     * then the value of currentBid is replaced by bidAmt and buyerName is is replaced by bidderName.*
+     * Preconditions:
+     * The auction is not closed (i.e. timeRemaining > 0).*
+     * Postconditions:
+     * currentBid Reflects the largest bid placed on this object.
+     * If the auction is closed, throw a ClosedAuctionException.*
+     * Throws:
+     * ClosedAuctionException: Thrown if the auction is closed and no more bids can be placed
+     * (i.e. timeRemaining == 0).
+     */
+    public void newBid(String bidderName, double bidAmt) throws ClosedAuctionException{
+        if (bidAmt > this.getCurrentBid() && this.getTimeRemaining() > 0){
+            this.buyerName = bidderName;
+            this.currentBid = bidAmt;
+        }
+    }
+
+
+    /**
+     * returns string of data members in tabular form.
+     */
+
+    public String toString(){
+        String result = " " + this.getAuctionID() + " | $" + this.getCurrentBid() + " | " + this.getBuyerName()
+                + " | " + this.timeRemaining +" hours | " + this.getItemInfo();
+        return result;
+    }
+}
+
+
+/**
+ * This is self-defined exception following the given instructions.
+ */
+class ClosedAuctionException extends Exception{
+
 }
