@@ -227,4 +227,24 @@ public class AuctionTable implements Serializable {
             System.out.println(stringAuctionHashMap.get(i).toString());
         }
     }
+
+    public void removeAuctionFromTable(String auctionID){
+        for (int i = 0; i < stringAuctionHashMap.size()+1 ; i++){
+            if (this.stringAuctionHashMap.get(i).getAuctionID() == auctionID){
+                this.stringAuctionHashMap.remove(this.stringAuctionHashMap.get(i));
+            }
+        }
+    }
+}
+
+class AuctionNotFoundException extends Exception{
+    public static void main(String[] args) {
+        System.out.println("There is not such auction in the current table!");
+    }
+}
+
+class LowBidException extends Exception{
+    public static void main(String[] args) {
+        System.out.println("Your bid cannot be equal or lower than the current bid of this item!");
+    }
 }

@@ -103,5 +103,7 @@ public class Auction implements Serializable {
  * This is self-defined exception following the given instructions.
  */
 class ClosedAuctionException extends Exception{
-
+    public static void main(String[] args) {
+        System.out.println("This auction is currently closed.");
+    }
 }
