@@ -21,10 +21,8 @@ public class AuctionSystem implements Serializable {
                         "Creating new table...  ");
                 auctionTable = new AuctionTable();
             }else{
-                FileInputStream file = new FileInputStream("auction.obj");
-                ObjectInputStream inStream = new ObjectInputStream(file);
                 System.out.println("Loading previous Auction Table...");
-                auctionTable = (AuctionTable) inStream.readObject();
+                AuctionSystem.objectInputStream();
             }
             System.out.println("Please select a username: ");
             String userInputUsername = stdin.nextLine().trim();
@@ -122,6 +120,7 @@ public class AuctionSystem implements Serializable {
                         break;
                     case "Q":
                         System.out.println("Writing Auction Table to file... ");
+                        AuctionSystem.objectOutputStream();
                         System.out.println("Done!\n" +
                                 "\n" +
                                 "Goodbye.");
@@ -135,7 +134,8 @@ public class AuctionSystem implements Serializable {
             }
 
         }catch (IllegalArgumentException IAE){
-
+            System.out.println("Illegal arguments found!");
+            throw new RuntimeException(IAE);
         } catch (FileNotFoundException e) {
             System.out.println("File not found!");
             throw new RuntimeException();
@@ -166,5 +166,30 @@ public class AuctionSystem implements Serializable {
         }else{
             return userDoubleFloor + 1;
         }
+    }
+
+
+    /**
+     * In order to generate the saved data and export it to the directory of the java project.
+     * @throws IOException all IOExceptions will be thrown.
+     */
+    public static void objectOutputStream () throws IOException {
+        FileOutputStream file = new FileOutputStream("auctions.obj");
+        ObjectOutputStream outputStream = new ObjectOutputStream(file);
+        AuctionTable auctions = AuctionSystem.auctionTable;
+        outputStream.writeObject(auctions);
+    }
+
+
+    /**
+     * In order to import the previously saved data.
+     * @throws IOException all IOExceptions will be thrown.
+     * @throws ClassNotFoundException will be thrown if file not found.
+     */
+    public static void objectInputStream () throws IOException, ClassNotFoundException {
+        FileInputStream file = new FileInputStream("auctions.obj");
+        ObjectInputStream inputStream = new ObjectInputStream(file);
+        AuctionTable auctions = (AuctionTable) inputStream.readObject();
+        AuctionSystem.auctionTable = auctions;
     }
 }
