@@ -1,4 +1,17 @@
 
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Email: yichen.li.1@stonybrook.edu
+ *  Programming assignment number: HW6
+ *  Course: CSE214
+ *  Recitation: R02
+ *      TAs: Yu Xiang (Naxy) Dong, Ryan Chen
+ */
+
+package hw6;
+
+
 import java.io.Serializable;
 import java.util.*;
 import big.data.*;
@@ -12,60 +25,75 @@ import big.data.*;
 public class AuctionTable implements Serializable {
     public HashMap<String, Auction> stringAuctionHashMap;
     public static ArrayList<String> idNumArrayList = new ArrayList<>();
+
+    /**
+     * Constructor. Intended to be use when a new table is needed.
+     */
     public AuctionTable(){
         stringAuctionHashMap = new HashMap<>();
     }
 
+
+    /**
+     * Uses the BigData library to construct an AuctionTable from a remote data source.
+     * @param URL String representing the URL fo the remote data source.
+     * @return The AuctionTable constructed from the remote data source.
+     * @throws IllegalArgumentException Thrown if the URL does not represent a valid datasource
+     *          (can't connect or invalid syntax).
+ *             /**Below are notes to denote how to briefly extract information
+     *             *            what we need from the given sample urls.
+ *              * I copied from the HW6.html instructions.
+ *              *
+ *              * listing/seller_info/seller_name
+ *              * listing/auction_info/current_bid
+ *              * listing/auction_info/time_left
+ *              * listing/auction_info/id_num
+ *              * listing/auction_info/high_bidder/bidder_name
+ *              * // the following should be combined to get the information of the item
+ *              *      listing/item_info/memory
+ *              *      listing/item_info/hard_drive
+ *              *      listing/item_info/cpu
+ *              *
+ *              *      following the instructions and recommendations, using this method to generate
+     *                  a String array would
+ *              *       be a good choice, it is a blackbox method for me,
+     *                  I just need to replace the empty Strings with
+ *              *      "N/A".
+     *
+     */
     public static AuctionTable buildFromURL(String URL) throws IllegalArgumentException{
         DataSource ds = DataSource.connect(URL).load();
         if (!URL.contains("http://") && !URL.contains("https://")){
             throw new IllegalArgumentException("This is not an eligible URL!");
         }else{
-            /**Below are notes to denote how to briefly extract information what we need from the given sample urls.
-             * I copied from the HW6.html instructions.
-             *
-             * listing/seller_info/seller_name
-             * listing/auction_info/current_bid
-             * listing/auction_info/time_left
-             * listing/auction_info/id_num
-             * listing/auction_info/high_bidder/bidder_name
-             * // the following should be combined to get the information of the item
-             *      listing/item_info/memory
-             *      listing/item_info/hard_drive
-             *      listing/item_info/cpu
-             *
-             *      following the instructions and recommendations, using this method to generate a String array would
-             *      be a good choice, it is a blackbox method for me, I just need to replace the empty Strings with
-             *      "N/A".
-             */
-            String[] sellerNameList = ds.fetchStringArray("listing/seller_info/seller_name");
             String[] currentBidList = ds.fetchStringArray("listing/auction_info/current_bid");
+            String[] sellerNameList = ds.fetchStringArray("listing/seller_info/seller_name");
             String[] timeLeftList = ds.fetchStringArray("listing/auction_info/time_left");
-            String[] idNumList = ds.fetchStringArray("listing/auction_info/id_num");
             String[] bidderNameList = ds.fetchStringArray("listing/auction_info/high_bidder/bidder_name");
+            String[] idNumList = ds.fetchStringArray("listing/auction_info/id_num");
             String[] memoryList = ds.fetchStringArray("listing/item_info/memory");
-            String[] hardDriveList = ds.fetchStringArray("listing/item_info/hard_drive");
             String[] cpuList = ds.fetchStringArray("listing/item_info/cpu");
+            String[] hardDriveList = ds.fetchStringArray("listing/item_info/hard_drive");
             String[] itemList = AuctionTable.mergeThreeStringArrays(cpuList,memoryList,hardDriveList);
-            AuctionTable.replaceEmptyStringToNA(sellerNameList);
             AuctionTable.replaceEmptyStringToNA(currentBidList);
             AuctionTable.replaceEmptyStringToNA(timeLeftList);
-            AuctionTable.replaceEmptyStringToNA(idNumList);
+            AuctionTable.replaceEmptyStringToNA(sellerNameList);
             AuctionTable.replaceEmptyStringToNA(bidderNameList);
+            AuctionTable.replaceEmptyStringToNA(idNumList);
             AuctionTable.replaceEmptyStringToNA(memoryList);
-            AuctionTable.replaceEmptyStringToNA(hardDriveList);
             AuctionTable.replaceEmptyStringToNA(cpuList);
+            AuctionTable.replaceEmptyStringToNA(hardDriveList);
             AuctionTable.replaceEmptyStringToNA(itemList);
             AuctionTable auctionTable = new AuctionTable();
             AuctionTable.deleteStringArrayEmptySpace(timeLeftList);
             for (int i = 0; i < idNumList.length; i++){
                 String currentBid = currentBidList[i].substring(1);
-                currentBid = currentBid.replaceAll(",", "");
                 currentBid = currentBid.replaceAll("$", "");
+                currentBid = currentBid.replaceAll(",", "");
                 double doubleCurrentBid = Double.parseDouble(currentBid);
-                String timeString = timeLeftList[i];
                 int timeGoes = 0;
-                if (timeString.contains("day") && !timeString.contains("hour")){
+                String timeString = timeLeftList[i];
+                if (timeString.contains("day") && !timeString.contains("hour") && !timeString.contains("hr")){
                     int indexOfDays = timeString.indexOf("day") - 1;
                     String days = timeString.substring(0, indexOfDays);
                     days = AuctionTable.removeNonNumbers(days);
@@ -82,7 +110,7 @@ public class AuctionTable implements Serializable {
                     hours = AuctionTable.removeNonNumbers(hours);
                     int numOfHours = Integer.parseInt(hours);
                     timeGoes += numOfHours;
-                } else if (timeString.contains("hour")){
+                } else if (timeString.contains("hour") || timeString.contains("hr")  ){
                     int indexOfComma = timeString.indexOf(",");
                     String hours = "";
                     hours += timeString.substring(indexOfComma+1, indexOfComma+2);
@@ -247,6 +275,10 @@ public class AuctionTable implements Serializable {
         }
     }
 
+    /**
+     * self-defined method to remove a specific auction using its key.
+     * @param auctionID
+     */
     public void removeAuctionFromTable(String auctionID){
         //511601118
         for (int i = 0; i < stringAuctionHashMap.size()+1 ; i++){
@@ -278,6 +310,11 @@ public class AuctionTable implements Serializable {
         return result;
     }
 
+
+    /**
+     * Unused getter method.
+     * @return
+     */
     public HashMap<String, Auction> getStringAuctionHashMap() {
         return this.stringAuctionHashMap;
     }
@@ -292,12 +329,18 @@ public class AuctionTable implements Serializable {
     }
 }
 
+/**
+ * Auction Not Found Exception, self defined. Will be thrown if auction not found.
+ */
 class AuctionNotFoundException extends Exception{
     public static void main(String[] args) {
         System.out.println("There is not such auction in the current table!");
     }
 }
 
+/**
+ * Low Bid Exception, will be thrown if the newer bid is lower or equal to the current bid.
+ */
 class LowBidException extends Exception{
     public static void main(String[] args) {
         System.out.println("Your bid cannot be equal or lower than the current bid of this item!");

@@ -10,6 +10,7 @@ public class DirectoryTree {
      * Requested data fields, include root and cursor.
      */
     private DirectoryNode root, cursor;
+    private DirectoryNode[] recursiveFindArray = new DirectoryNode[10];
 
     public DirectoryNode getCursor() {
         return this.cursor;
@@ -235,12 +236,10 @@ public class DirectoryTree {
             for (int i = 0; i < DirectoryNode.MAX_CHILDREN; i++){
                 recursiveFind(inputName,node.getChild(i));
             }
-
-            
-                //return;
-
         }
     }
+
+
 
 
     /**
@@ -287,4 +286,5 @@ public class DirectoryTree {
             this.setCursor(cursor.getParent());
         }
     }
+
 }

@@ -23,6 +23,7 @@ public class BashTerminal{
                 String possibleMkdirName = "";
                 String possibleTouchName = "";
                 String possibleFindName = "";
+                String possibleMoveName = "";
 
 
                 /*

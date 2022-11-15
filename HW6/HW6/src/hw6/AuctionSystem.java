@@ -1,4 +1,18 @@
 
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Email: yichen.li.1@stonybrook.edu
+ *  Programming assignment number: HW6
+ *  Course: CSE214
+ *  Recitation: R02
+ *      TAs: Yu Xiang (Naxy) Dong, Ryan Chen
+ */
+
+
+package hw6;
+
 import java.io.*;
 import java.util.*;
 
@@ -12,10 +26,17 @@ import java.util.*;
 
 public class AuctionSystem implements Serializable {
 
+    /**
+     * required data fields.
+     */
     private static AuctionTable auctionTable;
     private static String userName;
 
 
+    /**
+     * Main method to run the program.
+     * @param args
+     */
     public static void main(String[] args){
         Scanner stdin = new Scanner(System.in);
         System.out.println("Starting...");

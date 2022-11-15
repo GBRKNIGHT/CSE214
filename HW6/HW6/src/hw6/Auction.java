@@ -1,16 +1,35 @@
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Email: yichen.li.1@stonybrook.edu
+ *  Programming assignment number: HW6
+ *  Course: CSE214
+ *  Recitation: R02
+ *      TAs: Yu Xiang (Naxy) Dong, Ryan Chen
+ */
+
+package hw6;
+
 import java.io.Serializable;
 
+/**
+ * <a href=" http://tinyurl.com/nbf5g2h ">...</a> - Ebay Auction Data
+ * <a href=" http://tinyurl.com/p7vub89 ">...</a> - Yahoo Auction Data
+ */
 public class Auction implements Serializable {
     private int timeRemaining;
     private double currentBid;
-    private String auctionID, sellerName, buyerName,itemInfo;
+    private String auctionID, sellerName, buyerName, itemInfo;
 
 
-    public Auction(){}// default constructor
+    public Auction() {
+    }// default constructor
 
 
     /**
      * Constructor with all specified parameters.
+     *
      * @param timeRemaining
      * @param currentBid
      * @param auctionID
@@ -18,8 +37,8 @@ public class Auction implements Serializable {
      * @param buyerName
      * @param itemInfo
      */
-    public Auction (int timeRemaining, double currentBid, String auctionID, String sellerName, String buyerName,
-                    String itemInfo){
+    public Auction(int timeRemaining, double currentBid, String auctionID, String sellerName, String buyerName,
+                   String itemInfo) {
         this.timeRemaining = timeRemaining;
         this.currentBid = currentBid;
         this.auctionID = auctionID;
@@ -54,20 +73,22 @@ public class Auction implements Serializable {
 
 
     /**
-     * This method is intended to decrease the time remaining currently. 
+     * This method is intended to decrease the time remaining currently.
+     *
      * @param time the requested time decreased.
      */
-    public void decrementTimeRemaining(int time){
-        if (time >= this.timeRemaining){
+    public void decrementTimeRemaining(int time) {
+        if (time >= this.timeRemaining) {
             this.timeRemaining = 0;
-        }else{
+        } else {
             int currentTimeRemaining = this.getTimeRemaining();
             this.timeRemaining = (currentTimeRemaining - time);
         }
     }
 
 
-    /** Brief:
+    /**
+     * Brief:
      * Makes a new bid on this auction. If bidAmt is larger than currentBid,
      * then the value of currentBid is replaced by bidAmt and buyerName is is replaced by bidderName.*
      * Preconditions:
@@ -79,8 +100,8 @@ public class Auction implements Serializable {
      * ClosedAuctionException: Thrown if the auction is closed and no more bids can be placed
      * (i.e. timeRemaining == 0).
      */
-    public void newBid(String bidderName, double bidAmt) throws ClosedAuctionException{
-        if (bidAmt > this.getCurrentBid() && this.getTimeRemaining() > 0){
+    public void newBid(String bidderName, double bidAmt) throws ClosedAuctionException {
+        if (bidAmt > this.getCurrentBid() && this.getTimeRemaining() > 0) {
             this.buyerName = bidderName;
             this.currentBid = bidAmt;
         }
@@ -89,34 +110,20 @@ public class Auction implements Serializable {
 
     /**
      * returns string of data members in tabular form.
+     * the original toString method will be overwritten.
      */
     @Override
-    public String toString(){
+    public String toString() {
         String result = String.format(" %s |$ %9.2f |%-21s| %-23s|%4d hours | %s",
-                this.getAuctionID(), this.roundDoubleToCent(this.getCurrentBid()), this.getSellerName(), this.getBuyerName(),
-                this.getTimeRemaining(), this.getItemInfo() );
+                this.getAuctionID(), this.getCurrentBid(), this.getSellerName(), this.getBuyerName(),
+                this.getTimeRemaining(), this.getItemInfo());
         return result;
     }
 
-
+}
     /**
-     * Method to round double to cent, 2 digits after the points.
-     * @param doubleIn
-     * @return
+     * This is self-defined exception following the given instructions.
      */
-    public double roundDoubleToCent(double doubleIn){
-        int integer;
-        double doubleOut = doubleIn * 100;
-        integer = (int) doubleOut;
-        doubleOut /= integer/100;
-        return doubleOut;
+    class ClosedAuctionException extends Exception {
+
     }
-}
-
-
-/**
- * This is self-defined exception following the given instructions.
- */
-class ClosedAuctionException extends Exception{
-
-}
