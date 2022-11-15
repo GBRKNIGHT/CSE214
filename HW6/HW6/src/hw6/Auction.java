@@ -90,11 +90,26 @@ public class Auction implements Serializable {
     /**
      * returns string of data members in tabular form.
      */
-
+    @Override
     public String toString(){
-        String result = " " + this.getAuctionID() + " | $" + this.getCurrentBid() + " | " + this.getBuyerName()
-                + " | " + this.timeRemaining +" hours | " + this.getItemInfo();
+        String result = String.format(" %s |$ %9.2f |%-21s| %-23s|%4d hours | %s",
+                this.getAuctionID(), this.roundDoubleToCent(this.getCurrentBid()), this.getSellerName(), this.getBuyerName(),
+                this.getTimeRemaining(), this.getItemInfo() );
         return result;
+    }
+
+
+    /**
+     * Method to round double to cent, 2 digits after the points.
+     * @param doubleIn
+     * @return
+     */
+    public double roundDoubleToCent(double doubleIn){
+        int integer;
+        double doubleOut = doubleIn * 100;
+        integer = (int) doubleOut;
+        doubleOut /= integer/100;
+        return doubleOut;
     }
 }
 
@@ -103,7 +118,5 @@ public class Auction implements Serializable {
  * This is self-defined exception following the given instructions.
  */
 class ClosedAuctionException extends Exception{
-    public static void main(String[] args) {
-        System.out.println("This auction is currently closed.");
-    }
+
 }

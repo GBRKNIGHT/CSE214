@@ -3,10 +3,18 @@ import java.io.Serializable;
 import java.util.*;
 import big.data.*;
 
+
+/**
+ * <a href=" http://tinyurl.com/nbf5g2h ">...</a> - Ebay Auction Data
+ * <a href=" http://tinyurl.com/p7vub89 ">...</a> - Yahoo Auction Data
+ */
+
 public class AuctionTable implements Serializable {
     public HashMap<String, Auction> stringAuctionHashMap;
-
-    public AuctionTable(){}
+    public static ArrayList<String> idNumArrayList = new ArrayList<>();
+    public AuctionTable(){
+        stringAuctionHashMap = new HashMap<>();
+    }
 
     public static AuctionTable buildFromURL(String URL) throws IllegalArgumentException{
         DataSource ds = DataSource.connect(URL).load();
@@ -60,6 +68,7 @@ public class AuctionTable implements Serializable {
                 if (timeString.contains("day") && !timeString.contains("hour")){
                     int indexOfDays = timeString.indexOf("day") - 1;
                     String days = timeString.substring(0, indexOfDays);
+                    days = AuctionTable.removeNonNumbers(days);
                     int numOfDays = Integer.parseInt(days);
                     timeGoes+= 24 * numOfDays;
                 } else if (timeString.contains("day")){
@@ -67,15 +76,17 @@ public class AuctionTable implements Serializable {
                     String days = timeString.substring(0, indexOfDays);
                     int numOfDays = Integer.parseInt(days);
                     timeGoes+= 24 * numOfDays;
-                    int indexOfComma = timeString.indexOf(",");
+                    int indexOfHours = timeString.indexOf("hour") - 1;
                     String hours = "";
-                    hours += timeString.substring(indexOfComma+1, indexOfComma+2);
+                    hours += timeString.substring(indexOfHours - 2, indexOfHours);
+                    hours = AuctionTable.removeNonNumbers(hours);
                     int numOfHours = Integer.parseInt(hours);
                     timeGoes += numOfHours;
                 } else if (timeString.contains("hour")){
                     int indexOfComma = timeString.indexOf(",");
                     String hours = "";
                     hours += timeString.substring(indexOfComma+1, indexOfComma+2);
+                    hours = AuctionTable.removeNonNumbers(hours);
                     int numOfHours = Integer.parseInt(hours);
                     timeGoes += numOfHours;
                 }
@@ -108,7 +119,7 @@ public class AuctionTable implements Serializable {
 
 
     /**
-     * find the min length of 3 String arrays. Intended to prevent to existence of a item without necessary
+     * find the min length of 3 String arrays. Intended to prevent to existence of an item without necessary
      * components.
      * stringArray1 means cpu, 2 means memory, 3 means hard drive.
      * @param stringArray1
@@ -170,10 +181,15 @@ public class AuctionTable implements Serializable {
      * @throws IllegalArgumentException
      */
     public void putAuction(String auctionID, Auction auction) throws IllegalArgumentException{
-        if (this.stringAuctionHashMap.containsKey(auctionID)){
+        if (this.stringAuctionHashMap == null){
+            this.stringAuctionHashMap.put(auctionID, auction);
+            AuctionTable.idNumArrayList.add(auctionID);
+        }
+        else if (this.stringAuctionHashMap.containsKey(auctionID)){
             throw new IllegalArgumentException("This ID already exist!");
         }else{
             this.stringAuctionHashMap.put(auctionID, auction);
+            AuctionTable.idNumArrayList.add(auctionID);
         }
     }
 
@@ -208,9 +224,10 @@ public class AuctionTable implements Serializable {
      */
     public void removeExpiredAuctions() throws NullPointerException{
         try{
-            for (int i = 0; i < stringAuctionHashMap.size()+1 ; i++){
-                if (this.stringAuctionHashMap.get(i).getTimeRemaining() == 0){
-                    this.stringAuctionHashMap.remove(this.stringAuctionHashMap.get(i));
+            for (int i = 0; i < idNumArrayList.size(); i++){
+                if (getAuction(AuctionTable.idNumArrayList.get(i)).getTimeRemaining() <= 0){
+                    this.stringAuctionHashMap.remove(AuctionTable.idNumArrayList.get(i));
+                    idNumArrayList.remove(i);
                 }
             }
         }catch (NullPointerException NPE){
@@ -222,17 +239,55 @@ public class AuctionTable implements Serializable {
     /**
      * Prints the AuctionTable in tabular form.
      */
-    public void printTable() {
-        for (int i = 0; i < stringAuctionHashMap.size(); i++) {
-            System.out.println(stringAuctionHashMap.get(i).toString());
+    public void printTable(){
+        for (int i = 0; i < idNumArrayList.size(); i++){
+            if (stringAuctionHashMap.get(idNumArrayList.get(i))!= null){
+                System.out.println(stringAuctionHashMap.get(idNumArrayList.get(i)));
+            }
         }
     }
 
     public void removeAuctionFromTable(String auctionID){
+        //511601118
         for (int i = 0; i < stringAuctionHashMap.size()+1 ; i++){
-            if (this.stringAuctionHashMap.get(i).getAuctionID() == auctionID){
-                this.stringAuctionHashMap.remove(this.stringAuctionHashMap.get(i));
+            if (AuctionTable.idNumArrayList.get(i).equals(auctionID)){
+                this.stringAuctionHashMap.remove(auctionID);
             }
+        }
+        for (int i = 0; i < idNumArrayList.size(); i++){
+            if (idNumArrayList.get(i).equals(auctionID)){
+                idNumArrayList.remove(i);
+            }
+        }
+    }
+
+
+
+    /**
+     * This method is intended to delete non-numeric characters in a string.
+     * @param s input string
+     * @return new string contains only numeric character.
+     */
+    public static String removeNonNumbers(String s){
+        String result = "";
+        for (int i = 0; i < s.length(); i++){
+            if (Character.isDigit(s.charAt(i))){
+                result += s.charAt(i);
+            }
+        }
+        return result;
+    }
+
+    public HashMap<String, Auction> getStringAuctionHashMap() {
+        return this.stringAuctionHashMap;
+    }
+
+    /**
+     * extra method in order to make the IDNumArrayList to follow the hashmap.
+     */
+    public void setIdNumArrayList() {
+        for (String key : stringAuctionHashMap.keySet()){
+            idNumArrayList.add(key);
         }
     }
 }
