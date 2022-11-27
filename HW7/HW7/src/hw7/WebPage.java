@@ -1,3 +1,16 @@
+
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Email: yichen.li.1@stonybrook.edu
+ *  Programming assignment number: HW6
+ *  Course: CSE214
+ *  Recitation: R02
+ *      TAs: Yu Xiang (Naxy) Dong, Ryan Chen
+ */
+
+
 package hw7;
 
 import java.util.*;
@@ -64,5 +77,17 @@ public class WebPage {
             result += this.keywords.get(i);
         }
         return result;
+    }
+
+
+    /**
+     * Personalized static method, intended to split a string into an arraylist. Using a space.
+     * @param s the input string, intended to be keywords.
+     * @return the arraylist of keywords.
+     */
+    public static ArrayList<String> stringToArrayList(String s){
+        String[] resultArray = s.split(" ", 999);
+        ArrayList<String> resultArrayList = new ArrayList<>(Arrays.asList(resultArray));
+        return resultArrayList;
     }
 }

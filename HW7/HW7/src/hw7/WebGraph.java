@@ -1,3 +1,16 @@
+
+
+/**
+ *  Name: Yichen Li
+ *  SBU ID: 112946979
+ *  Email: yichen.li.1@stonybrook.edu
+ *  Programming assignment number: HW6
+ *  Course: CSE214
+ *  Recitation: R02
+ *      TAs: Yu Xiang (Naxy) Dong, Ryan Chen
+ */
+
+
 package hw7;
 
 import java.io.*;
@@ -20,14 +33,6 @@ public class WebGraph {
 
     }
 
-    /**
-     * Another constructor with given parameters.
-     * @param pagesFile pages file
-     * @param linksFile links file
-     */
-    public WebGraph(File pagesFile, File linksFile){
-
-    }
 
     /**
      * Two setters for the data fields.
@@ -67,9 +72,11 @@ public class WebGraph {
      *                                previous homework assignment.
      * @throws FileNotFoundException if the file does not exist, this might happen from the experience of the
      *      *                                previous homework assignment.
+     * @throws SourceDestinationSameException self-defined exception.
      */
     public static WebGraph buildFromFiles(String pagesFile, String linksFile) throws
-            FileNotFoundException,IllegalArgumentException, IOException, ClassNotFoundException {
+            FileNotFoundException, IllegalArgumentException, IOException, ClassNotFoundException,
+            SourceDestinationSameException {
         File pagesFileFile = new File(pagesFile);
         File linksFileFile = new File(linksFile);
         if(!pagesFileFile.exists() || !linksFileFile.exists()){
@@ -89,9 +96,10 @@ public class WebGraph {
      * @return The constructed WebGraph.
      * @throws IOException,ClassNotFoundException,IllegalArgumentException 3 possible exceptions
      * which are expected might will happen here.
+     * @throws SourceDestinationSameException self-defined exception.
      */
     public WebGraph objectInputStream (String pagesFile, String linksFile)
-            throws IOException, ClassNotFoundException, IllegalArgumentException {
+            throws IOException, ClassNotFoundException, IllegalArgumentException, SourceDestinationSameException {
         FileInputStream pagesFileStream  = new FileInputStream(pagesFile);
         FileInputStream linksFileStream = new FileInputStream(linksFile);
         ObjectInputStream pagesInputStream = new ObjectInputStream(pagesFileStream);
@@ -190,8 +198,10 @@ public class WebGraph {
      * @param stdin the imported scanner for file called "links.txt" or similar files.
      * @return the 2d arraylist of the edges.
      * @throws IllegalArgumentException will be thrown if unexpected values appeared.
+     * @throws SourceDestinationSameException self-defined exception.
      */
-    public ArrayList<ArrayList<Integer>> scannerToEdges(Scanner stdin) throws IllegalArgumentException{
+    public ArrayList<ArrayList<Integer>> scannerToEdges(Scanner stdin) throws
+            IllegalArgumentException, SourceDestinationSameException {
         int size = 0;
         ArrayList<ArrayList<Integer>> resultOfEdges = new ArrayList<>();
         for (int i = 0; i < this.pages.size(); i++){
@@ -291,6 +301,12 @@ public class WebGraph {
     }
 
 
+    public void addPage(WebPage page) throws IllegalArgumentException{
+        this.extendTheCurrentEdgesAndPages(page);
+        this.updatePageRanks();
+    }
+
+
     /**
      * This method is a sub-method of addPage. This is intended to extend the webPage and extend
      * the edges(2d ArrayList).
@@ -313,10 +329,13 @@ public class WebGraph {
      * @param destination the URL of the page which the hyperlink points to.
      * @preconditions Both parameters reference WebPages which exist in the graph.
      * @throws IllegalArgumentException  If either of the URLs are null or could not be found in pages.
+     * @throws SourceDestinationSameException self-defined exception.
      */
-    public void addLink(String source, String destination) throws IllegalArgumentException{
+    public void addLink(String source, String destination) throws
+            IllegalArgumentException, SourceDestinationSameException {
         int locationOfS1 = this.searchForPage(source);
         int locationOfS2 = this.searchForPage(destination);
+        if (WebGraph.stringEqual(source,destination)) throw new SourceDestinationSameException();
         if (locationOfS2 < 0 || locationOfS1 < 0) throw new IllegalArgumentException();
         ArrayList<Integer> arrayListOfEdge = this.edges.get(locationOfS1);
         arrayListOfEdge.set(locationOfS2,1);
@@ -403,5 +422,14 @@ public class WebGraph {
             printOutTable.add(oneOfPagePrint);
         }
     }
+}
+
+
+/**
+ * Exception will be thrown if the new link has the same destination and source. Because according to the
+ * given sample, there is not such link which can direct a page to itself.
+ */
+class SourceDestinationSameException extends Exception{
+    String s = "SourceDestinationSameException";
 }
 
