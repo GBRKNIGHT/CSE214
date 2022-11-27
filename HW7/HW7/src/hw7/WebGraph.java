@@ -196,8 +196,6 @@ public class WebGraph {
      */
     public ArrayList<ArrayList<Integer>> scannerToEdges(Scanner stdin) throws IllegalArgumentException{
         int size = 0;
-        int locationOfS1;
-        int locationOfS2;
         ArrayList<ArrayList<Integer>> resultOfEdges = new ArrayList<>();
         for (int i = 0; i < resultOfEdges.size(); i++){
             resultOfEdges.set(i, new ArrayList<Integer>(size));
@@ -216,12 +214,7 @@ public class WebGraph {
             }
             String s1 = pagesLine.substring(0, pagesLine.indexOf(' '));
             String s2 = pagesLine.substring(pagesLine.indexOf(' ')+1);
-            locationOfS1 = this.searchForPage(s1);
-            locationOfS2 = this.searchForPage(s2);
-            if (locationOfS2 < 0 || locationOfS1 < 0) throw new IllegalArgumentException();
-            ArrayList<Integer> arrayListOfEdge = resultOfEdges.get(locationOfS1);
-            ArrayList<Integer> newerArrayListOfEdge = WebGraph.setArrayListOfEdge(arrayListOfEdge, locationOfS2);
-            resultOfEdges.set(locationOfS1, newerArrayListOfEdge);
+            this.addLink(s1,s2);
         }
         return resultOfEdges;
     }
@@ -299,6 +292,7 @@ public class WebGraph {
         newPage.setUrl(url);
         newPage.setIndex(this.pages.size());
         this.extendTheCurrentEdgesAndPages(newPage);
+        this.updatePageRanks();
     }
 
 
@@ -316,7 +310,103 @@ public class WebGraph {
     }
 
 
+    /**
+     * Brief:
+     * Adds a link from the WebPage with the URL indicated by source
+     * to the WebPage with the URL indicated by destination.
+     * @param source the URL of the page which contains the hyperlink to destination.
+     * @param destination the URL of the page which the hyperlink points to.
+     * @preconditions Both parameters reference WebPages which exist in the graph.
+     * @throws IllegalArgumentException  If either of the URLs are null or could not be found in pages.
+     */
     public void addLink(String source, String destination) throws IllegalArgumentException{
+        int locationOfS1 = this.searchForPage(source);
+        int locationOfS2 = this.searchForPage(destination);
+        if (locationOfS2 < 0 || locationOfS1 < 0) throw new IllegalArgumentException();
+        ArrayList<Integer> arrayListOfEdge = this.edges.get(locationOfS1);
+        arrayListOfEdge.set(locationOfS2,1);
+        this.edges.set(locationOfS1,arrayListOfEdge);
+        this.updatePageRanks();
+    }
 
+
+    /**
+     * @Brief: Removes the WebPage from the graph with the given URL.
+     * @param url The URL of the page to remove from the graph.
+     * @PostConditions The WebPage with the indicated URL has been removed from the graph,
+     * and it's corresponding row and column has been removed from the adjacency matrix.
+     * All pages that has an index greater than the index that was removed should decrease their index value by 1.
+     * If url is null or could not be found in pages, the method ignores the input and does nothing.
+     * @throws IllegalArgumentException will be thrown if the url imported is not valid.
+     */
+    public void removePage(String url) throws IllegalArgumentException{
+        int indexOfUrl = this.searchForPage(url);
+        if (indexOfUrl < 0) throw new IllegalArgumentException();
+        for (int i = 0; i < this.edges.size(); i++){
+            ArrayList<Integer> tempArrayList = this.edges.get(i);
+            tempArrayList.remove(indexOfUrl);
+            this.edges.set(i, tempArrayList);
+        }
+        this.edges.remove(indexOfUrl);
+        this.updatePageRanks();
+    }
+
+
+    /**
+     * Removes the link from WebPage with the URL indicated by source to the WebPage
+     * with the URL indicated by destination.
+     * @param source The URL of the WebPage to remove the link.
+     * @param destination The URL of the link to be removed.
+     */
+    public void removeLink(String source, String destination){
+        if (this.searchForPage(source)< 0 || this.searchForPage(destination)<0){
+            // does nothing if either of the URLs could not be found.
+            return;
+        }
+        int locationOfSource = this.searchForPage(source);
+        int locationOfDestination = this.searchForPage(destination);
+        ArrayList<Integer> sourceRow = this.edges.get(locationOfSource);
+        sourceRow.set(locationOfDestination, 0);
+        this.edges.set(locationOfSource, sourceRow);
+        this.updatePageRanks();
+    }
+
+
+    /**
+     * @Briefs: Calculates and assigns the PageRank for every page in the WebGraph.
+     * Note: This operation should be performed after ANY alteration of the graph structure.
+     */
+    public void updatePageRanks() {
+        for(int i = 0;i < pages.size();i++) {
+            int rank = 0;
+            for (int j = 0;j<pages.size();j++){
+                if(edges.get(j).get(i) == 1) rank++;
+            }
+            pages.get(i).setRank(rank);
+        }
+    }
+
+
+    /**
+     * Prints the WebGraph in tabular form.
+     */
+    public void printTable(){
+        ArrayList<String> printOutTable = new ArrayList<>();
+        printOutTable.add("Index     URL               PageRank  Links               Keywords");
+        printOutTable.add("-------------------------------------------------------------------------" +
+                "-----------------------------");
+        for (int i = 0; i < pages.size(); i++){
+            String oneOfPagePrint = "  " + i + "  | " + this.pages.get(i).getUrl();
+            oneOfPagePrint += "    |    " + this.pages.get(i).getRank() + "    | ";
+            String linksString = "";
+            for (int j = 0; j < this.edges.get(i).size(); j++){
+                if (this.edges.get(i).get(j) == 1) {
+                    linksString += j + ", ";
+                }
+            }
+            oneOfPagePrint += linksString;
+            printOutTable.add(oneOfPagePrint);
+        }
     }
 }
+
