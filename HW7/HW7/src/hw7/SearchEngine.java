@@ -15,6 +15,7 @@ package hw7;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 import java.io.File;
 public class SearchEngine {
@@ -74,9 +75,9 @@ public class SearchEngine {
                             "(RP) - Remove a page from the graph.\n" +
                             "(AL) - Add a link between pages in the graph.\n" +
                             "(RL) - Remove a link between pages in the graph.\n" +
-                            "(P) - Print the graph.\n" +
-                            "(I) Sort based on index (ASC)\n" +
-                            "(U) Sort based on URL (ASC)\n" +
+                            "      ==(P) - Print the graph.\n" +
+                            "      ==(I) Sort based on index (ASC)\n" +
+                            "      ==(U) Sort based on URL (ASC)\n" +
                             "(R) Sort based on rank (DSC)\n" +
                             "(S) - Search for pages with a keyword.\n" +
                             "(Q) - Quit.");
@@ -140,23 +141,28 @@ public class SearchEngine {
                             String userSubMenu = stdin.nextLine().trim().toUpperCase();
                             switch (userSubMenu){
                                 case "I":
-                                    userSearchEngine.web.getPages();
+                                    Collections.sort(userSearchEngine.web.getPages(), new IndexComparator());
+                                    userSearchEngine.web.printTable();
                                     break;
                                 case "U":
+                                    Collections.sort(userSearchEngine.web.getPages(), new URLComparator());
+                                    userSearchEngine.web.printTable();
                                     break;
                                 case "R":
+                                    Collections.sort(userSearchEngine.web.getPages(), new RankComparator());
+                                    userSearchEngine.web.printTable();
                                     break;
                                 default:
                                     throw new OptionNotInMenuException();
                             }
                             break;
-                        case "I":
-                            break;
-                        case "U":
-                            break;
-                        case "R":
+                        case "I","U","R":
+                            System.out.println("This is an option in the sub-menu. " +
+                                    "Please do not call it directly.");
                             break;
                         case "S":
+                            System.out.println("Search keyword: ");
+                            String userKeywordSearch = stdin.nextLine().trim();
                             break;
                         case "Q":
                             System.out.println("Goodbye.");

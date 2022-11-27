@@ -12,9 +12,13 @@
 
 
 package hw7;
+import java.util.Comparator;
 
-public class IndexComparator extends Comparator {
-    public int compareTo(WebPage webPage1, WebPage webPage2) {
+public class IndexComparator implements Comparator {
+
+    public int compare(Object webPage1O, Object webPage2O) {
+        WebPage webPage1 = (WebPage) webPage1O;
+        WebPage webPage2 = (WebPage) webPage2O;
         if (webPage1.getIndex() == webPage2.getIndex()) return 0;
         else if (webPage1.getIndex() > webPage2.getIndex()) return 1;
         else return -1;

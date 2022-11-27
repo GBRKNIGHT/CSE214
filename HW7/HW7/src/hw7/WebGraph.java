@@ -422,6 +422,39 @@ public class WebGraph {
             printOutTable.add(oneOfPagePrint);
         }
     }
+
+
+    /**
+     * Personalized searching method, by input a specific keyword.
+     * @param searchingStringInput the intended searching.
+     * @return return the arraylist of webpages which contains the keyword.
+     */
+    public ArrayList<WebPage> searchByKeyword(String searchingStringInput){
+        ArrayList<WebPage> webPageArrayList = new ArrayList<>();
+        for (int i = 0; i < this.pages.size(); i++){
+            ArrayList<String> keyWordsArrayList = this.pages.get(i).getKeywords();
+            if (WebGraph.containKeywords(keyWordsArrayList, searchingStringInput)){
+                webPageArrayList.add(this.pages.get(i));
+            }
+        }
+        return webPageArrayList;
+    }
+
+
+    /**
+     * Personalized method, to find if the string arraylist contains the intended keyword.
+     * @param stringArrayList arraylist
+     * @param s searching string
+     * @return boolean value.
+     */
+    public static boolean containKeywords (ArrayList<String> stringArrayList, String s){
+        for (int i = 0; i < stringArrayList.size(); i++){
+            if (WebGraph.stringEqual(stringArrayList.get(i), s)){
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
