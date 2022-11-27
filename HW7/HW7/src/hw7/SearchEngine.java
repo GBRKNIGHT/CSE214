@@ -140,6 +140,7 @@ public class SearchEngine {
                             String userSubMenu = stdin.nextLine().trim().toUpperCase();
                             switch (userSubMenu){
                                 case "I":
+                                    userSearchEngine.web.getPages();
                                     break;
                                 case "U":
                                     break;
