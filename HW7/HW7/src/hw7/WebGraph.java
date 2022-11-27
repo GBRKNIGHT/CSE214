@@ -42,7 +42,7 @@ public class WebGraph {
 
 
     /**
-     * Two getters of the data fields in this class. 
+     * Two getters of the data fields in this class.
      */
     public ArrayList<ArrayList<Integer>> getEdges() {
         return this.edges;
@@ -275,5 +275,48 @@ public class WebGraph {
             }
         }
         return newerArrayListOfEdge;
+    }
+
+
+    /**
+     * Adds a page to the WebGraph.
+     *
+     * Preconditions:
+     * url is unique and does not exist as the URL of a WebPage already in the graph.
+     * url and keywords are not null.
+     *
+     * Post-conditions:
+     * The page has been added to pages at index 'i' and links has been logically extended to include
+     * the new row and column indexed by 'i'.
+     * @param url The URL of the webpage (must not already exist in the WebGraph).
+     * @param keywords The keywords associated with the WebPage.
+     * @throws IllegalArgumentException
+     * If url is not unique and already exists in the graph, or if either argument is null.
+     */
+    public void addPage(String url, ArrayList<String> keywords) throws IllegalArgumentException{
+        WebPage newPage = new WebPage();
+        newPage.setKeywords(keywords);
+        newPage.setUrl(url);
+        newPage.setIndex(this.pages.size());
+        this.extendTheCurrentEdgesAndPages(newPage);
+    }
+
+
+    /**
+     * This method is a sub-method of addPage. This is intended to extend the webPage and extend
+     * the edges(2d ArrayList).
+     * @param webPage the new webPage.
+     */
+    public void extendTheCurrentEdgesAndPages(WebPage webPage){
+        this.pages.add(webPage);
+        for (int i = 0; i < this.edges.size(); i++){
+            this.edges.get(i).add(0);
+        }
+        this.edges.add(new ArrayList<Integer>(this.edges.size()+1));
+    }
+
+
+    public void addLink(String source, String destination) throws IllegalArgumentException{
+
     }
 }
