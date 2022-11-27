@@ -22,8 +22,8 @@ public class WebGraph {
 
     /**
      * Another constructor with given parameters.
-     * @param pagesFile
-     * @param linksFile
+     * @param pagesFile pages file
+     * @param linksFile links file
      */
     public WebGraph(File pagesFile, File linksFile){
 
@@ -56,7 +56,7 @@ public class WebGraph {
      * Constructs a WebGraph object using the indicated files as the source for pages and edges.
      * @param pagesFile String of the relative path to the file containing the page information.
      * @param linksFile String of the relative path to the file containing the link information.
-     * @Preconditions:
+     * @Pre-conditions:
      *      Both parameters reference text files which exist.
      *      The files follow proper format as outlined in the "Reading Graph from File" section below.
      * @return The WebGraph constructed from the text files.
@@ -72,12 +72,11 @@ public class WebGraph {
             FileNotFoundException,IllegalArgumentException, IOException, ClassNotFoundException {
         File pagesFileFile = new File(pagesFile);
         File linksFileFile = new File(linksFile);
-        if(pagesFileFile.exists() == false || linksFileFile.exists() == false){
+        if(!pagesFileFile.exists() || !linksFileFile.exists()){
             throw new FileNotFoundException();
         }else{
             WebGraph webGraph = new WebGraph();
-            WebGraph webGraph1 = webGraph.objectInputStream(pagesFile, linksFile);
-            webGraph = webGraph1;
+            webGraph = webGraph.objectInputStream(pagesFile, linksFile);
             return webGraph;
         }
     }
@@ -104,9 +103,8 @@ public class WebGraph {
         while (pagesScanner.nextLine()!= null){
             String pagesLine = pagesScanner.nextLine().trim();
             if (!WebGraph.stringContainsSpace(pagesLine)){
-                String lineUrl = pagesLine;
                 WebPage lineWebpage = new WebPage();
-                lineWebpage.setUrl(lineUrl);
+                lineWebpage.setUrl(pagesLine);
             }else{
                 webPageArrayList = WebGraph.scannerToWebpage(pagesScanner);
             }
@@ -157,9 +155,8 @@ public class WebGraph {
         while (stdin.nextLine()!= null){
             String pagesLine = stdin.nextLine().trim();
             if (!WebGraph.stringContainsSpace(pagesLine)){
-                String lineUrl = pagesLine;
                 WebPage lineWebpage = new WebPage();
-                lineWebpage.setUrl(lineUrl);
+                lineWebpage.setUrl(pagesLine);
                 result.add(lineWebpage);
             }
             else{
@@ -191,13 +188,13 @@ public class WebGraph {
     /**
      * One of two scanners in this class, designed for file called "links.txt" or similar files
      * @param stdin the imported scanner for file called "links.txt" or similar files.
-     * @return
+     * @return the 2d arraylist of the edges.
      * @throws IllegalArgumentException will be thrown if unexpected values appeared.
      */
     public ArrayList<ArrayList<Integer>> scannerToEdges(Scanner stdin) throws IllegalArgumentException{
         int size = 0;
         ArrayList<ArrayList<Integer>> resultOfEdges = new ArrayList<>();
-        for (int i = 0; i < resultOfEdges.size(); i++){
+        for (int i = 0; i < this.pages.size(); i++){
             resultOfEdges.set(i, new ArrayList<Integer>(size));
         }
         while (stdin.nextLine()!= null){
@@ -239,8 +236,8 @@ public class WebGraph {
     /**
      * Personalized string equal method, intended to be a part of another method for search a url in the existing
      * array list in the data field, and the imported string of url.
-     * @param s1
-     * @param s2
+     * @param s1 the first string.
+     * @param s2 the second string.
      * @return boolean value, if they are same, true. Either false.
      */
     public static boolean stringEqual(String s1, String s2){
@@ -273,11 +270,9 @@ public class WebGraph {
 
     /**
      * Adds a page to the WebGraph.
-     *
      * Preconditions:
      * url is unique and does not exist as the URL of a WebPage already in the graph.
      * url and keywords are not null.
-     *
      * Post-conditions:
      * The page has been added to pages at index 'i' and links has been logically extended to include
      * the new row and column indexed by 'i'.
@@ -331,7 +326,7 @@ public class WebGraph {
 
 
     /**
-     * @Brief: Removes the WebPage from the graph with the given URL.
+     * @Brief Removes the WebPage from the graph with the given URL.
      * @param url The URL of the page to remove from the graph.
      * @PostConditions The WebPage with the indicated URL has been removed from the graph,
      * and it's corresponding row and column has been removed from the adjacency matrix.
