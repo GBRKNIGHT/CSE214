@@ -4,18 +4,34 @@ import java.io.*;
 import java.util.*;
 
 public class WebGraph {
+    /**
+     * Expected data fields.
+     */
     public static final int MAX_PAGES = 40;
     private ArrayList<WebPage> pages;
     private ArrayList<ArrayList<Integer>> edges = new ArrayList<>(MAX_PAGES);
 
+
+    /**
+     * The default constructor. A brand new WebGraph contains nothing will be created if this method is been
+     * called.
+     */
     public WebGraph() {
 
     }
 
+    /**
+     * Another constructor with given parameters.
+     * @param pagesFile
+     * @param linksFile
+     */
     public WebGraph(File pagesFile, File linksFile){
 
     }
 
+    /**
+     * Two setters for the data fields.
+     */
     public void setPages(ArrayList<WebPage> pages) {
         this.pages = pages;
     }
@@ -25,31 +41,63 @@ public class WebGraph {
     }
 
 
-    public static WebGraph buildFromFiles(String pagesFile, String linksFile) throws IllegalArgumentException{
+    /**
+     * Two getters of the data fields in this class. 
+     */
+    public ArrayList<ArrayList<Integer>> getEdges() {
+        return this.edges;
+    }
+
+    public ArrayList<WebPage> getPages() {
+        return this.pages;
+    }
+
+    /**
+     * Constructs a WebGraph object using the indicated files as the source for pages and edges.
+     * @param pagesFile String of the relative path to the file containing the page information.
+     * @param linksFile String of the relative path to the file containing the link information.
+     * @Preconditions:
+     *      Both parameters reference text files which exist.
+     *      The files follow proper format as outlined in the "Reading Graph from File" section below.
+     * @return The WebGraph constructed from the text files.
+     * @throws IllegalArgumentException Thrown if either of the files does not reference a valid text file,
+     *                                  or if the files are not formatted correctly.
+     * @throws IOException the IOException.
+     * @throws ClassNotFoundException if the class is not found, this might happen from the experience of the
+     *                                previous homework assignment.
+     * @throws FileNotFoundException if the file does not exist, this might happen from the experience of the
+     *      *                                previous homework assignment.
+     */
+    public static WebGraph buildFromFiles(String pagesFile, String linksFile) throws
+            FileNotFoundException,IllegalArgumentException, IOException, ClassNotFoundException {
         File pagesFileFile = new File(pagesFile);
         File linksFileFile = new File(linksFile);
         if(pagesFileFile.exists() == false || linksFileFile.exists() == false){
-            throw new IllegalArgumentException();
+            throw new FileNotFoundException();
         }else{
             WebGraph webGraph = new WebGraph();
-
+            WebGraph webGraph1 = webGraph.objectInputStream(pagesFile, linksFile);
+            webGraph = webGraph1;
             return webGraph;
         }
     }
 
 
-
-    public static WebGraph[] objectInputStream (String pagesFile, String linksFile)
-            throws IOException, ClassNotFoundException {
+    /**
+     * The method intended to use 2 files to construct the data fields in this class called WebGraph.
+     * @param pagesFile the pages file.
+     * @param linksFile the links file.
+     * @return The constructed WebGraph.
+     * @throws IOException,ClassNotFoundException,IllegalArgumentException 3 possible exceptions
+     * which are expected might will happen here.
+     */
+    public WebGraph objectInputStream (String pagesFile, String linksFile)
+            throws IOException, ClassNotFoundException, IllegalArgumentException {
         FileInputStream pagesFileStream  = new FileInputStream(pagesFile);
         FileInputStream linksFileStream = new FileInputStream(linksFile);
         ObjectInputStream pagesInputStream = new ObjectInputStream(pagesFileStream);
         ObjectInputStream linksInputStream = new ObjectInputStream(linksFileStream);
         WebGraph webGraph = (WebGraph) pagesInputStream.readObject();
-        WebGraph webGraph1 = (WebGraph) linksInputStream.readObject();
-        WebGraph[] result = new WebGraph[2];
-        result[0] = webGraph;
-        result[1] = webGraph1;
         Scanner pagesScanner = new Scanner(pagesInputStream);
         Scanner linksScanner = new Scanner(linksInputStream);
         ArrayList<WebPage> webPageArrayList = new ArrayList<>();
@@ -63,8 +111,10 @@ public class WebGraph {
                 webPageArrayList = WebGraph.scannerToWebpage(pagesScanner);
             }
         }
-
-        return result;
+        this.setPages(webPageArrayList);
+        ArrayList<ArrayList<Integer>> edgesExisting = webGraph.scannerToEdges(linksScanner);
+        webGraph.setEdges(edgesExisting);
+        return webGraph;
     }
 
 
@@ -138,9 +188,22 @@ public class WebGraph {
     }
 
 
-    public static ArrayList<ArrayList<Integer>> scannerToEdges(Scanner stdin) throws IllegalArgumentException{
+    /**
+     * One of two scanners in this class, designed for file called "links.txt" or similar files
+     * @param stdin the imported scanner for file called "links.txt" or similar files.
+     * @return
+     * @throws IllegalArgumentException will be thrown if unexpected values appeared.
+     */
+    public ArrayList<ArrayList<Integer>> scannerToEdges(Scanner stdin) throws IllegalArgumentException{
+        int size = 0;
+        int locationOfS1;
+        int locationOfS2;
         ArrayList<ArrayList<Integer>> resultOfEdges = new ArrayList<>();
+        for (int i = 0; i < resultOfEdges.size(); i++){
+            resultOfEdges.set(i, new ArrayList<Integer>(size));
+        }
         while (stdin.nextLine()!= null){
+            size++;
             String pagesLine = stdin.nextLine().trim();
             if (!WebGraph.stringContainsSpace(pagesLine)){
                 System.out.println("This line does not include any spaces!");
@@ -151,11 +214,24 @@ public class WebGraph {
                 System.out.println("This line contains more than one spaces!");
                 throw new IllegalArgumentException();
             }
+            String s1 = pagesLine.substring(0, pagesLine.indexOf(' '));
+            String s2 = pagesLine.substring(pagesLine.indexOf(' ')+1);
+            locationOfS1 = this.searchForPage(s1);
+            locationOfS2 = this.searchForPage(s2);
+            if (locationOfS2 < 0 || locationOfS1 < 0) throw new IllegalArgumentException();
+            ArrayList<Integer> arrayListOfEdge = resultOfEdges.get(locationOfS1);
+            ArrayList<Integer> newerArrayListOfEdge = WebGraph.setArrayListOfEdge(arrayListOfEdge, locationOfS2);
+            resultOfEdges.set(locationOfS1, newerArrayListOfEdge);
         }
         return resultOfEdges;
     }
 
 
+    /**
+     * Searching for the url in the data field.
+     * @param inputSearching the url intended to find in the arraylist.
+     * @return return the index of the url.
+     */
     public Integer searchForPage(String inputSearching){
         for (int i = 0; i < this.pages.size(); i++){
             String urlFromPagesArrayList = this.pages.get(i).getUrl();
@@ -163,10 +239,17 @@ public class WebGraph {
                 return i;
             }
         }
-        return -999;
+        return -99999;
     }
 
 
+    /**
+     * Personalized string equal method, intended to be a part of another method for search a url in the existing
+     * array list in the data field, and the imported string of url.
+     * @param s1
+     * @param s2
+     * @return boolean value, if they are same, true. Either false.
+     */
     public static boolean stringEqual(String s1, String s2){
         if (s1.length() != s2.length()) return false;
         int length = s1.length();
@@ -174,5 +257,23 @@ public class WebGraph {
             if (s1.charAt(i)!= s2.charAt(i)) return false;
         }
         return true;
+    }
+
+
+    /**
+     * The personalized method in order to update the existing arraylist of integer. We can update a new edge without
+     * changing the original ones.
+     * @param arrayListOfEdge the existing arraylist of Integer,
+     * @param newEdgeIndex the index of the position of new edge.
+     * @return return the updated ArrayList of Integers.
+     */
+    public static ArrayList<Integer> setArrayListOfEdge(ArrayList<Integer> arrayListOfEdge, int newEdgeIndex){
+        ArrayList<Integer> newerArrayListOfEdge = arrayListOfEdge;
+        for (int i = 0; i < arrayListOfEdge.size(); i++){
+            if (i == newEdgeIndex){
+                newerArrayListOfEdge.set(i, 1);
+            }
+        }
+        return newerArrayListOfEdge;
     }
 }
