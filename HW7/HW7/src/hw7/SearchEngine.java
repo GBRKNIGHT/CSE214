@@ -88,14 +88,27 @@ public class SearchEngine {
                             System.out.println("Enter keywords (space-separated): ");
                             String userKeywords = stdin.nextLine().trim();
                             ArrayList<String> userKeywordsArrayList = WebPage.stringToArrayList(userKeywords);
+                            for (int i = 0; i < userSearchEngine.web.getPages().size(); i++){
+                                if (WebGraph.stringEqual(userSearchEngine.web.getPages().get(i).getUrl(), userURL)){
+                                    System.out.println("Error: " + userURL +" already exists in the WebGraph. " +
+                                            "Could not add new WepPage.");
+                                    throw new WebpageAlreadyExistException();
+                                }
+                            }
                             WebPage userNewWebPage = new WebPage();
                             userNewWebPage.setUrl(userURL);
                             userNewWebPage.setKeywords(userKeywordsArrayList);
+                            System.out.println(userURL + " has been successfully added to the WebGraph!");
                             userSearchEngine.web.addPage(userNewWebPage);
                             break;
                         case "RP":
                             System.out.println("Enter a URL:  ");
                             String userURLRemoving = stdin.nextLine().trim();
+                            if(userSearchEngine.web.searchForPage(userURLRemoving) < 0) {
+                                System.out.println("Error: "+userURLRemoving +
+                                        " could not be found in the WebGraph.");
+                                throw new WebpageNotFoundException();
+                            }
                             userSearchEngine.web.removePage(userURLRemoving);
                             System.out.println(userURLRemoving + " has been removed from the graph!");
                             break;
@@ -103,12 +116,16 @@ public class SearchEngine {
                             System.out.println("Enter a source URL: ");
                             String userSourceURL = stdin.nextLine().trim();
                             if(userSearchEngine.web.searchForPage(userSourceURL) < 0) {
-                                throw new FileNotFoundException();
+                                System.out.println("Error: "+userSourceURL +
+                                        " could not be found in the WebGraph.");
+                                throw new WebpageNotFoundException();
                             }
                             System.out.println("Enter a destination URL: ");
                             String userDestinationURL = stdin.nextLine().trim();
                             if(userSearchEngine.web.searchForPage(userDestinationURL) < 0) {
-                                throw new FileNotFoundException();
+                                System.out.println("Error: "+userDestinationURL +
+                                        " could not be found in the WebGraph.");
+                                throw new WebpageNotFoundException();
                             }
                             userSearchEngine.web.addLink(userSourceURL,userDestinationURL);
                             System.out.println("Link successfully added from " + userSourceURL + " to "
@@ -118,12 +135,16 @@ public class SearchEngine {
                             System.out.println("Enter a source URL: ");
                             String userSourceURLRL = stdin.nextLine().trim();
                             if(userSearchEngine.web.searchForPage(userSourceURLRL) < 0) {
-                                throw new FileNotFoundException();
+                                System.out.println("Error: "+userSourceURLRL +
+                                        " could not be found in the WebGraph.");
+                                throw new WebpageNotFoundException();
                             }
                             System.out.println("Enter a source URL: ");
                             String userDestinationURLRL = stdin.nextLine().trim();
                             if(userSearchEngine.web.searchForPage(userDestinationURLRL) < 0) {
-                                throw new FileNotFoundException();
+                                System.out.println("Error: "+userDestinationURLRL +
+                                        " could not be found in the WebGraph.");
+                                throw new WebpageNotFoundException();
                             }
                             if (WebGraph.stringEqual(userSourceURLRL,userDestinationURLRL)){
                                 throw new SourceDestinationSameException();
@@ -184,6 +205,7 @@ public class SearchEngine {
                             break;
                         case "Q":
                             System.out.println("Goodbye.");
+                            System.out.println("Program terminating successfully...");
                             System.exit(0);
                         default:
                             throw new OptionNotInMenuException();
@@ -201,6 +223,13 @@ public class SearchEngine {
                 throw new RuntimeException(e);
             } catch (SourceDestinationSameException e) {
                 System.out.println("Same destination and source!");
+            }catch (IndexOutOfBoundsException IOOBE){
+
+            }catch (WebpageAlreadyExistException WAEE){
+
+            }
+            catch (WebpageNotFoundException WNFE){
+
             }
 
         }
@@ -212,5 +241,17 @@ public class SearchEngine {
  * Exception class if the unexpected menu options appeared.
  */
 class OptionNotInMenuException extends Exception{
+    String s = "OptionNotInMenuException";
+}
 
+/**
+ * Exception will be thrown if the adding website already exist in the map.
+ */
+class WebpageAlreadyExistException extends Exception{
+    String s = "WebpageAlreadyExistException";
+}
+
+
+class WebpageNotFoundException extends Exception{
+    String s = "WebpageNotFoundException";
 }

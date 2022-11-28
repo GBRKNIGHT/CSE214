@@ -302,6 +302,7 @@ public class WebGraph {
             this.edges.get(i).add(0);
         }
         this.edges.add(new ArrayList<Integer>(this.edges.size()+1));
+        this.updatePageRanks();
     }
 
 
@@ -346,6 +347,7 @@ public class WebGraph {
             this.edges.set(i, tempArrayList);
         }
         this.edges.remove(indexOfUrl);
+        this.pages.remove(indexOfUrl);
         this.updatePageRanks();
     }
 
