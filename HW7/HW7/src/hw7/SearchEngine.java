@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.Scanner;
 import java.io.File;
 public class SearchEngine {
-    public static final String PAGES_FILE = "pages.txt";
-    public static final String LINKS_FILE = "links.txt";
+    public static final String PAGES_FILE = "./pages.txt";
+    public static final String LINKS_FILE = "./links.txt";
     private WebGraph web = new WebGraph();
     private File pagesFile, linksFile;
 
@@ -64,23 +64,21 @@ public class SearchEngine {
                     File pagesFile = new File(PAGES_FILE);
                     File linksFile = new File(LINKS_FILE);
                     if(!pagesFile.exists() || !linksFile.exists()){
-                        throw new FileNotFoundException();
+                        System.out.println("File not found!");
+                        break;
                     }
                     WebGraph webGraph = WebGraph.buildFromFiles(PAGES_FILE, LINKS_FILE);
                     userSearchEngine.setWeb(webGraph);
                     existingGraph = true;
                     System.out.println("Success!");
                 }else {
-                    System.out.println("(AP) - Add a new page to the graph.\n" +
-                            "(RP) - Remove a page from the graph.\n" +
-                            "(AL) - Add a link between pages in the graph.\n" +
-                            "(RL) - Remove a link between pages in the graph.\n" +
-                            "      ==(P) - Print the graph.\n" +
-                            "      ==(I) Sort based on index (ASC)\n" +
-                            "      ==(U) Sort based on URL (ASC)\n" +
-                            "(R) Sort based on rank (DSC)\n" +
-                            "(S) - Search for pages with a keyword.\n" +
-                            "(Q) - Quit.");
+                    System.out.println("    (AP) - Add a new page to the graph.\n" +
+                            "    (RP) - Remove a page from the graph.\n" +
+                            "    (AL) - Add a link between pages in the graph.\n" +
+                            "    (RL) - Remove a link between pages in the graph.\n" +
+                            "    (P)  - Print the graph.\n" +
+                            "    (S)  - Search for pages with a keyword.\n" +
+                            "    (Q)  - Quit.");
                     System.out.println("Please select an option: ");
                     String userOption = stdin.nextLine().trim().toUpperCase();
                     switch (userOption) {
@@ -113,6 +111,8 @@ public class SearchEngine {
                                 throw new FileNotFoundException();
                             }
                             userSearchEngine.web.addLink(userSourceURL,userDestinationURL);
+                            System.out.println("Link successfully added from " + userSourceURL + " to "
+                            + userDestinationURL + "!");
                             break;
                         case "RL":
                             System.out.println("Enter a source URL: ");
@@ -163,6 +163,24 @@ public class SearchEngine {
                         case "S":
                             System.out.println("Search keyword: ");
                             String userKeywordSearch = stdin.nextLine().trim();
+                            if (userSearchEngine.web.searchByKeyword(userKeywordSearch).size() < 1){
+                                System.out.println("No search results found for the keyword " +
+                                        userKeywordSearch+".");
+                            }else{
+                                ArrayList<WebPage> searchingWebsitesArrayList =
+                                        userSearchEngine.web.searchByKeyword(userKeywordSearch);
+                                ArrayList<String> printOutTable = new ArrayList<>();
+                                printOutTable.add
+                                        ("Rank   PageRank    URL");
+                                printOutTable.add("---------------------------------------------");
+                                for (int i = 0; i < searchingWebsitesArrayList.size(); i++){
+                                    printOutTable.add((i+1) + "     |    " + searchingWebsitesArrayList.get(i).getRank()
+                                    + "     | " + searchingWebsitesArrayList.get(i).getUrl());
+                                }
+                                for (int i = 0; i < printOutTable.size(); i++){
+                                    System.out.println(printOutTable.get(i));
+                                }
+                            }
                             break;
                         case "Q":
                             System.out.println("Goodbye.");

@@ -21,7 +21,7 @@ public class WebGraph {
      * Expected data fields.
      */
     public static final int MAX_PAGES = 40;
-    private ArrayList<WebPage> pages;
+    private ArrayList<WebPage> pages = new ArrayList<>();
     private ArrayList<ArrayList<Integer>> edges = new ArrayList<>(MAX_PAGES);
 
 
@@ -83,7 +83,7 @@ public class WebGraph {
             throw new FileNotFoundException();
         }else{
             WebGraph webGraph = new WebGraph();
-            webGraph = webGraph.objectInputStream(pagesFile, linksFile);
+            webGraph.objectInputStream(pagesFile, linksFile);
             return webGraph;
         }
     }
@@ -98,29 +98,52 @@ public class WebGraph {
      * which are expected might will happen here.
      * @throws SourceDestinationSameException self-defined exception.
      */
-    public WebGraph objectInputStream (String pagesFile, String linksFile)
+    public void objectInputStream (String pagesFile, String linksFile)
             throws IOException, ClassNotFoundException, IllegalArgumentException, SourceDestinationSameException {
         FileInputStream pagesFileStream  = new FileInputStream(pagesFile);
         FileInputStream linksFileStream = new FileInputStream(linksFile);
-        ObjectInputStream pagesInputStream = new ObjectInputStream(pagesFileStream);
-        ObjectInputStream linksInputStream = new ObjectInputStream(linksFileStream);
-        WebGraph webGraph = (WebGraph) pagesInputStream.readObject();
+        InputStreamReader pagesInputStream = new InputStreamReader(pagesFileStream);
+        InputStreamReader linksInputStream = new InputStreamReader(linksFileStream);
+       // WebGraph webGraph = (WebGraph) pagesInputStream.readObject();
+       // WebGraph webGraph = new WebGraph();
         Scanner pagesScanner = new Scanner(pagesInputStream);
         Scanner linksScanner = new Scanner(linksInputStream);
         ArrayList<WebPage> webPageArrayList = new ArrayList<>();
-        while (pagesScanner.nextLine()!= null){
+        while (pagesScanner.hasNextLine()){
             String pagesLine = pagesScanner.nextLine().trim();
             if (!WebGraph.stringContainsSpace(pagesLine)){
                 WebPage lineWebpage = new WebPage();
                 lineWebpage.setUrl(pagesLine);
             }else{
-                webPageArrayList = WebGraph.scannerToWebpage(pagesScanner);
+                webPageArrayList.add(WebGraph.scannerToWebpage(pagesLine));
             }
         }
         this.setPages(webPageArrayList);
-        ArrayList<ArrayList<Integer>> edgesExisting = webGraph.scannerToEdges(linksScanner);
-        webGraph.setEdges(edgesExisting);
-        return webGraph;
+
+        ArrayList<ArrayList<Integer>> edgesExisting = new ArrayList<>();
+        for (int i = 0; i < pages.size(); i++){
+            ArrayList<Integer> newLineEdges = new ArrayList<>();
+            for (int j = 0; j < this.pages.size(); j++){
+                newLineEdges.add(0);
+            }
+            edgesExisting.add(newLineEdges);
+        }
+        this.edges = edgesExisting;
+
+        while (linksScanner.hasNextLine()){
+            String linksLine = linksScanner.nextLine().trim();
+            String[] linksLineArray = linksLine.split(" ");
+            int sourceIndex = this.searchForPage(linksLineArray[0]);
+            int destIndex = this.searchForPage(linksLineArray[1]);
+                // webPageArrayList = WebGraph.scannerToWebpage(pagesScanner);
+                ArrayList<Integer> newLineEdges=
+                        WebGraph.scannerToEdges(this.edges.get(sourceIndex), sourceIndex,destIndex);
+               // this.edges.set(sourceIndex,newLineEdges);
+        }
+//        ArrayList<ArrayList<Integer>> edgesExisting = this.scannerToEdges(linksScanner);
+//        this.setEdges(edgesExisting);
+        this.updatePageRanks();
+        //return webGraph;
     }
 
 
@@ -155,74 +178,35 @@ public class WebGraph {
 
     /**
      * One of the two scanner method in this class, intended to face " pages.txt ", or similar files.
-     * @param stdin the scanner which will be imported.
+     * @param pagesLine the scanner which will be imported.
      * @return the webpages
      */
-    public static ArrayList<WebPage> scannerToWebpage(Scanner stdin){
-        ArrayList<WebPage> result = new ArrayList<>();
-        while (stdin.nextLine()!= null){
-            String pagesLine = stdin.nextLine().trim();
-            if (!WebGraph.stringContainsSpace(pagesLine)){
-                WebPage lineWebpage = new WebPage();
-                lineWebpage.setUrl(pagesLine);
-                result.add(lineWebpage);
-            }
-            else{
-                WebPage lineWebpage = new WebPage();
-                ArrayList<Integer> indexOfSpace = WebGraph.indexOfSpaces(pagesLine);
-                String lineUrl = pagesLine.substring(0,indexOfSpace.get(0));
-                lineWebpage.setUrl(lineUrl);
-                ArrayList<String> lineKeyWords = new ArrayList<>();
-                int numOfSpace = indexOfSpace.size();
-                int lineLength = pagesLine.length();
-                if (numOfSpace == 1){
-                    lineKeyWords.add(pagesLine.substring(indexOfSpace.get(0),lineLength));
-                    lineWebpage.setKeywords(lineKeyWords);
-                }else{
-                    for (int i = 1; (i + 1) <= numOfSpace; i++){
-                        String oneOfKeyword = pagesLine.substring(indexOfSpace.get(i), indexOfSpace.get(i+1)).trim();
-                        lineKeyWords.add(oneOfKeyword);
-                    }
-                    String lastKeyword = pagesLine.substring(indexOfSpace.get(indexOfSpace.size()), lineLength);
-                    lineKeyWords.add(lastKeyword);
-                    lineWebpage.setKeywords(lineKeyWords);
-                }
-            }
-        }
-        return result;
+    public static WebPage scannerToWebpage(String pagesLine){
+        WebPage lineWebpage = new WebPage();
+        ArrayList<Integer> indexOfSpace = WebGraph.indexOfSpaces(pagesLine);
+        String lineUrl = pagesLine.substring(0,indexOfSpace.get(0));
+        String keywordsString = pagesLine.substring(indexOfSpace.get(0)+1);
+        ArrayList<String> keywords = new ArrayList<>(Arrays.asList(keywordsString.split(" ")));
+        lineWebpage.setUrl(lineUrl);
+        lineWebpage.setKeywords(keywords);
+        return lineWebpage;
     }
 
 
     /**
      * One of two scanners in this class, designed for file called "links.txt" or similar files
-     * @param stdin the imported scanner for file called "links.txt" or similar files.
-     * @return the 2d arraylist of the edges.
+     * @param older the imported older arraylist of integers.
+     * @param destLocation location of destination.
+     * @param sourceLocation location of the source.
+     * @return the arraylist of the edges.
      * @throws IllegalArgumentException will be thrown if unexpected values appeared.
      * @throws SourceDestinationSameException self-defined exception.
      */
-    public ArrayList<ArrayList<Integer>> scannerToEdges(Scanner stdin) throws
-            IllegalArgumentException, SourceDestinationSameException {
-        int size = 0;
-        ArrayList<ArrayList<Integer>> resultOfEdges = new ArrayList<>();
-        for (int i = 0; i < this.pages.size(); i++){
-            resultOfEdges.set(i, new ArrayList<Integer>(size));
-        }
-        while (stdin.nextLine()!= null){
-            size++;
-            String pagesLine = stdin.nextLine().trim();
-            if (!WebGraph.stringContainsSpace(pagesLine)){
-                System.out.println("This line does not include any spaces!");
-                throw new IllegalArgumentException();
-            }
-            ArrayList<Integer> indexOfSpaces = WebGraph.indexOfSpaces(pagesLine);
-            if (indexOfSpaces.size() >= 2){
-                System.out.println("This line contains more than one spaces!");
-                throw new IllegalArgumentException();
-            }
-            String s1 = pagesLine.substring(0, pagesLine.indexOf(' '));
-            String s2 = pagesLine.substring(pagesLine.indexOf(' ')+1);
-            this.addLink(s1,s2);
-        }
+    public static ArrayList<Integer> scannerToEdges(ArrayList<Integer> older,int sourceLocation, int destLocation)
+            throws IllegalArgumentException, SourceDestinationSameException {
+        if (sourceLocation == destLocation) throw new SourceDestinationSameException();
+            ArrayList<Integer> resultOfEdges = older;
+            resultOfEdges.set(destLocation,1);
         return resultOfEdges;
     }
 
@@ -410,6 +394,11 @@ public class WebGraph {
         printOutTable.add("-------------------------------------------------------------------------" +
                 "-----------------------------");
         for (int i = 0; i < pages.size(); i++){
+            String keywords = "";
+            for (int j = 0; j < this.pages.get(i).getKeywords().size(); j++){
+                keywords += this.pages.get(i).getKeywords().get(j);
+                keywords += ",";
+            }
             String oneOfPagePrint = "  " + i + "  | " + this.pages.get(i).getUrl();
             oneOfPagePrint += "    |    " + this.pages.get(i).getRank() + "    | ";
             String linksString = "";
@@ -419,7 +408,11 @@ public class WebGraph {
                 }
             }
             oneOfPagePrint += linksString;
+            oneOfPagePrint +=  "    | " + keywords;
             printOutTable.add(oneOfPagePrint);
+        }
+        for (int i = 0; i < printOutTable.size(); i++){
+            System.out.println(printOutTable.get(i));
         }
     }
 

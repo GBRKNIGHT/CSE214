@@ -28,6 +28,8 @@ public class WebPage {
      * Default constructor
      */
     public WebPage() {
+        this.url = "";
+        this.keywords = new ArrayList<>();
     }
 
 
@@ -72,7 +74,7 @@ public class WebPage {
      * @return the wanted string.
      */
     public String toString(){
-        String result = "" + this.rank+"     " + "| google.com             |***|  ";
+        String result = "" + this.rank+"     " + "| " + this.url     +"       |";
         for (int i = 0; i < this.keywords.size(); i++){
             result += this.keywords.get(i);
         }
